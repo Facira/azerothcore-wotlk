@@ -19,7 +19,7 @@ if(sConfigMgr->GetBoolDefault("DoubleXP.Enable", true))
         day == boost::date_time::Saturday ||
         day == boost::date_time::Sunday) {
 
-        amount = amount*15; 
+        amount = amount*2; 
         ChatHandler(player->GetSession()).PSendSysMessage("Double XP is going on now!");}
 }
 }

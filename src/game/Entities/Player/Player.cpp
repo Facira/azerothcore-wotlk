@@ -74,6 +74,7 @@
 #include "SavingSystem.h"
 #include "TicketMgr.h"
 #include "ScriptMgr.h"
+#include "Config.h"
 
 #define ZONE_UPDATE_INTERVAL (2*IN_MILLISECONDS)
 
@@ -765,6 +766,12 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
 
     for (uint8 j = 0; j < PLAYER_MAX_BATTLEGROUND_QUEUES; ++j)
         m_bgBattlegroundQueueID[j] = BATTLEGROUND_QUEUE_NONE;
+	
+    // PlayedTimeReward
+    ptr_Interval = sConfigMgr->GetIntDefault("PlayedTimeReward.Interval", 0);
+    ptr_Money = sConfigMgr->GetIntDefault("PlayedTimeReward.Money", 0);
+    ptr_Honor = sConfigMgr->GetIntDefault("PlayedTimeReward.Honor", 0);
+    ptr_Arena = sConfigMgr->GetIntDefault("PlayedTimeReward.Arena", 0);
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
@@ -1635,6 +1642,21 @@ void Player::Update(uint32 p_time)
         stmt->setString(2, "");
         stmt->setUInt32(3, GetSession()->GetAccountId());
         LoginDatabase.Execute(stmt);
+    }
+	
+    // PlayedTimeReward
+    if (ptr_Interval > 0)
+    {
+        if (ptr_Interval <= p_time)
+        {
+            GetSession()->SendAreaTriggerMessage("Бонус за игровое время !");
+            ModifyMoney(ptr_Money);
+            ModifyHonorPoints(ptr_Honor);
+            ModifyArenaPoints(ptr_Arena);
+            ptr_Interval = sConfigMgr->GetIntDefault("PlayedTimeReward.Interval", 0);
+        }
+        else
+            ptr_Interval -= p_time;
     }
 
     if (!m_timedquests.empty())
